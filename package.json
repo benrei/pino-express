@@ -1,0 +1,30 @@
+{
+  "name": "pino-express",
+  "version": "0.1.2",
+  "description": "Custom Pino express middleware",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benrei/pino-express.git"
+  },
+  "keywords": [
+    "pino",
+    "express",
+    "log",
+    "logger",
+    "middleware"
+  ],
+  "author": "Benjamin Reiersølmoen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benrei/pino-express/issues"
+  },
+  "homepage": "https://github.com/benrei/pino-express#readme",
+  "dependencies": {
+    "ms": "^2.1.1",
+    "uuid": "^3.3.2"
+  }
+}
