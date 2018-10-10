@@ -64,20 +64,21 @@ function pinoExpress (pino) {
 
 function getReqInfo(req) {
   const request = {
-    requestUrl: req.headers['host'] + req.url,
+    requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
     method: req.method,
     params: req.params,
     query: req.query,
     body: req.body,
   };
   const requestHeaders = {
-    accept: req.headers['origin'] + req.url,
+    accept: req.headers['accept'],
     'accept-encoding': req.headers['accept-encoding'],
     'accept-language': req.headers['accept-language'],
     authorization: req.headers['authorization'],
     connection: req.headers['connection'],
     host: req.headers['host'],
     origin: req.headers['origin'],
+    referer: req.headers['referer'],
     userAgent: req.headers['user-agent'],
     'x-api-key': req.headers['x-api-key'],
   };
