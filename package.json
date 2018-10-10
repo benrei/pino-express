@@ -1,7 +1,7 @@
 {
   "name": "pino-express",
-  "version": "0.1.2",
-  "description": "Custom Pino express middleware",
+  "version": "0.1.3",
+  "description": "Pino express middleware",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,9 +13,11 @@
   "keywords": [
     "pino",
     "express",
-    "log",
+    "middleware",
     "logger",
-    "middleware"
+    "log",
+    "id",
+    "responsetime"
   ],
   "author": "Benjamin Reiersølmoen",
   "license": "MIT",
@@ -24,7 +26,6 @@
   },
   "homepage": "https://github.com/benrei/pino-express#readme",
   "dependencies": {
-    "ms": "^2.1.1",
-    "uuid": "^3.3.2"
+    "ms": "^2.1.1"
   }
 }

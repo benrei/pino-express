@@ -12,9 +12,7 @@ const app = require('express')
 const pino = require('pino')()
 const pinoExpress = require('pino-express')
 
-app.use(pinoExpress.helper);  //  Must be before pinoExpress.logger
-
-app.use(pinoExpress.logger(pino));
+app.use(pinoExpress(pino));
 
 app.get('/', function (req, res) {
   req.log.info('something')

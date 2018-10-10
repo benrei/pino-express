@@ -1,15 +1,21 @@
-'use strict';
-const uuid = require('uuid/v1');
+'use strict'
+
 const ms = require('ms');
+const startTime = Symbol('startTime');
 
-function pinoLogger (pino) {
+function pinoExpress (pino) {
+  let useLevel = pino.useLevel || 'info';
 
-  function onFinish (e) {
-    this.removeListener('finish', onFinish);
+  const logger = pino;
+  let genReqId = reqIdGenFactory(pino.genReqId);
+  return loggingMiddleware;
+
+  function onResFinished () {
+    this.removeListener('finish', onResFinished);
 
     const log = this.log;
-    let level = 'info';
-    if(this.statusCode >= 400) level = 'error';
+
+    if(this.statusCode >= 400) useLevel = 'error';
 
     const response = {
       requestUrl: this.req.headers['origin'] + this.req.url,
@@ -18,77 +24,76 @@ function pinoLogger (pino) {
       statusMessage: this.statusMessage,
     };
 
-    const duration = this.req.duration ? this.req.duration(): '';
-    log[level]({
-      id: this.locals.id,
+    log[useLevel]({
+      id: this.req.id,
       user_id: this.req.user && this.req.user.sub,
       response: response,
-      responseTime: duration
-    }, 'Request completed in ' + duration)
+      responseTime: this.req.duration()
+    }, 'Request completed in ' + this.req.duration())
   }
 
-  function onError(err) {
-    this.removeListener('error', onError);
+  function onResError (err) {
+    this.removeListener('error', onResError);
 
     const log = this.log;
-    const message = this;
 
     if (err || this.err || this.statusCode >= 500) {
-      const duration = this.req.duration ? this.req.duration(): '';
       log.error({
-        id: this.locals.id,
-        user_id: this.req.user && this.req.user.sub,
-        message: message,
+        res: this,
         err: err || this.err || new Error('failed with status code ' + this.statusCode),
-        responseTime: duration
-      }, 'Request errored in ' + duration);
-      return
+        responseTime: this.req.duration()
+      }, 'request errored')
     }
   }
 
-  return function loggingMiddleware (req, res, next) {
-    req.log = res.log = pino;
-    if(req.method !== 'OPTIONS'){
-      const request = {
-        requestUrl: req.headers['origin'] + req.url,
-        method: req.method,
-        host: req.headers['host'],
-        params: req.params,
-        query: req.query,
-        body: req.body,
-      };
-      const requestHeaders = {
-        accept: req.headers['origin'] + req.url,
-        'accept-encoding': req.headers['accept-encoding'],
-        'accept-language': req.headers['accept-language'],
-        authorization: req.headers['authorization'],
-        connection: req.headers['connection'],
-        host: req.headers['host'],
-        origin: req.headers['origin'],
-        userAgent: req.headers['user-agent'],
-        'x-api-key': req.headers['x-api-key'],
-      };
+  function loggingMiddleware (req, res, next) {
+    req.id = genReqId(req);
+    res.locals[startTime] = res.locals[startTime] || Date.now();
+    req.duration = req.duration || function () {return ms(Date.now() - res.locals[startTime])};
+    req.log = res.log = logger.child({id: req.id});
 
-      req.log.info({
-        id: res.locals.id,
-        request: request,
-        requestHeaders: requestHeaders,
-      }, 'Starting request..');
+    res.on('finish', onResFinished);
+    res.on('error', onResError);
 
-      res.on('finish', onFinish);
-      res.on('error', onError);
-    }
+    let requestInfo = getReqInfo(req);
+    req.log.info(requestInfo, 'Starting request..');
 
     if (next) next()
   }
 }
-function helperMiddleware(req, res, next) {
-  res.locals['id'] = uuid();
-  res.locals['startTime'] = Date.now();
-  req.duration = ()=> {return ms(Date.now() - res.locals['startTime'])};
-  return next();
+
+function getReqInfo(req) {
+  const request = {
+    requestUrl: req.headers['host'] + req.url,
+    method: req.method,
+    params: req.params,
+    query: req.query,
+    body: req.body,
+  };
+  const requestHeaders = {
+    accept: req.headers['origin'] + req.url,
+    'accept-encoding': req.headers['accept-encoding'],
+    'accept-language': req.headers['accept-language'],
+    authorization: req.headers['authorization'],
+    connection: req.headers['connection'],
+    host: req.headers['host'],
+    origin: req.headers['origin'],
+    userAgent: req.headers['user-agent'],
+    'x-api-key': req.headers['x-api-key'],
+  };
+  return {
+    request: request,
+    requestHeaders: requestHeaders,
+  }
 }
 
+function reqIdGenFactory (func) {
+  if (typeof func === 'function') return func;
+  const maxInt = 2147483647;
+  let nextReqId = 0;
+  return function genReqId (req) {
+    return req.id || (nextReqId = (nextReqId + 1) & maxInt)
+  }
+}
 
-module.exports.logger = pinoLogger;
-module.exports.helper = helperMiddleware;
+module.exports = pinoExpress;
