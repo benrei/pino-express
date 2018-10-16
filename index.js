@@ -14,22 +14,25 @@ function pinoExpress (pino) {
     this.removeListener('finish', onResFinished);
 
     const log = this.log;
+    const req = this.req;
+    const statusCode = this.statusCode;
 
-    if(this.statusCode >= 400) useLevel = 'error';
+    if(statusCode >= 400 && statusCode < 500) useLevel = 'warn';
+    if(statusCode >= 500) useLevel = 'error';
 
     const response = {
-      requestUrl: this.req.headers['origin'] + this.req.url,
-      method: this.req.method,
-      statusCode: this.statusCode,
+      requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
+      method: req.method,
+      statusCode: statusCode,
       statusMessage: this.statusMessage,
     };
 
     log[useLevel]({
-      id: this.req.id,
-      user_id: this.req.user && this.req.user.sub,
+      id: req.id,
+      user_id: req.user && req.user.sub,
       response: response,
-      responseTime: this.req.duration()
-    }, 'Request completed in ' + this.req.duration())
+      responseTime: req.duration()
+    }, `Complete! ${req.method} ${req.url} in ${req.duration()}`);
   }
 
   function onResError (err) {
@@ -37,13 +40,11 @@ function pinoExpress (pino) {
 
     const log = this.log;
 
-    if (err || this.err || this.statusCode >= 500) {
-      log.error({
-        res: this,
-        err: err || this.err || new Error('failed with status code ' + this.statusCode),
-        responseTime: this.req.duration()
-      }, 'request errored')
-    }
+    log.error({
+      res: this,
+      err: err || this.err || new Error('failed with status code ' + this.statusCode),
+      responseTime: this.req.duration()
+    }, `Error in: ${req.method} ${req.url}, after ${req.duration()}`);
   }
 
   function loggingMiddleware (req, res, next) {
@@ -56,7 +57,7 @@ function pinoExpress (pino) {
     res.on('error', onResError);
 
     let requestInfo = getReqInfo(req);
-    req.log.info(requestInfo, 'Starting request..');
+    req.log.info(requestInfo, `Starting.. ${req.method} ${req.url}`);
 
     if (next) next()
   }
@@ -66,8 +67,6 @@ function getReqInfo(req) {
   const request = {
     requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
     method: req.method,
-    params: req.params,
-    query: req.query,
     body: req.body,
   };
   const requestHeaders = {
