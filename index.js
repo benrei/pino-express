@@ -32,7 +32,7 @@ function pinoExpress (pino) {
       user_id: req.user && req.user.sub,
       response: response,
       responseTime: req.duration()
-    }, `Complete! ${req.method} ${req.url} in ${req.duration()}`);
+    }, `${req.method} ${req.url} finished in ${req.duration()}!`);
   }
 
   function onResError (err) {
@@ -44,20 +44,20 @@ function pinoExpress (pino) {
       res: this,
       err: err || this.err || new Error('failed with status code ' + this.statusCode),
       responseTime: this.req.duration()
-    }, `Error in: ${req.method} ${req.url}, after ${req.duration()}`);
+    }, `${req.method} ${req.url} errored after ${req.duration()}!`);
   }
 
   function loggingMiddleware (req, res, next) {
     req.id = genReqId(req);
     res.locals[startTime] = res.locals[startTime] || Date.now();
-    req.duration = req.duration || function () {return ms(Date.now() - res.locals[startTime])};
+    req.duration = req.duration || function () { return ` ${ms(Date.now() - res.locals[startTime])} ` };
     req.log = res.log = logger.child({id: req.id});
 
     res.on('finish', onResFinished);
     res.on('error', onResError);
 
     let requestInfo = getReqInfo(req);
-    req.log.info(requestInfo, `Starting.. ${req.method} ${req.url}`);
+    req.log.info(requestInfo, `${req.method} ${req.url} start..`);
 
     if (next) next()
   }
