@@ -1,4 +1,5 @@
 #pino-express
+
 Custom Pino express middleware
 
 Each request get it's own log id. This helps searching between async logs. See output sections
