@@ -33,7 +33,7 @@ app.get('/foo/bar', function (req, res) {
 
 app.listen(3000)
 ```
-#### Output
+### Output
 ```json
 {"level":30,"time":1540374819416,"msg":"GET /foo/bar Request started..","pid":94018,"hostname":"brMBP.local","id":1,"request":{"requestUrl":"http://localhost:3000/","method":"GET"},"requestHeaders":{"accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8","accept-encoding":"gzip, deflate, br","accept-language":"nb-NO,nb;q=0.9,en-US;q=0.8,en;q=0.7,no;q=0.6,nn;q=0.5","connection":"keep-alive","host":"localhost:3000","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36"},"v":1}
 {"level":30,"time":1540375273277,"msg":"I have something to log!","pid":94327,"hostname":"brMBP.local","id":1,"v":1}
@@ -41,7 +41,7 @@ app.listen(3000)
 {"level":30,"time":1540375273277,"msg":"How long did this take? 2ms","pid":94327,"hostname":"brMBP.local","id":1,"v":1}
 {"level":30,"time":1540374819426,"msg":"GET /foo/bar -> Request finished in 11ms!","pid":94018,"hostname":"brMBP.local","id":1,"response":{"requestUrl":"http://localhost:3000/","method":"GET","statusCode":304,"statusMessage":"Not Modified"},"responseTime":"11ms","v":1}
 ```
-
+For prettified output, see the [Optional step](#Optional)
 
 ##  Use with [pino-multi-stream](https://github.com/pinojs/pino-multi-stream)
 ```js
@@ -73,22 +73,28 @@ app.get('/', function (req, res) {
 app.listen(3000)
 ```
 
-## Optional: pino-pretty
+## Optional
+### Use with [pino-pretty](https://github.com/pinojs/pino-pretty)
+>$ npm i pino-pretty -g
 
-In package.json
-```json
+To prettify log output, use `pino-pretty` in either:
+
+Console
+```sh
+> node app.js | pino-pretty -c -t
+```
+
+Or in package.json
+```js
 {
+  ...
   "scripts": {
-    "dev": "node app.js | pino-pretty -c -t"  //  Prettify console logging output
+    "start": "node app.js | pino-pretty -c -t"  //  Prettify console logging output
   }
 }
 ```
-or console
-```sh
-node app.js | pino-pretty - c -t
-```
 
-#### Output
+### Output
 ```sh
 [2018-10-24 09:38:10.365 +0000] INFO (93998 on brMBP.local): GET /foo/bar -> Request started..
     id: 1
