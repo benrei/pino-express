@@ -1,6 +1,6 @@
 {
   "name": "pino-express",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Pino express middleware",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,8 @@
     "logger",
     "log",
     "id",
+    "request",
+    "duration",
     "responsetime"
   ],
   "author": "Benjamin Reiersølmoen",

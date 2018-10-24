@@ -8,6 +8,13 @@ Each request get it's own log id. This helps searching between async logs. See o
 ```sh
 npm i pino-express
 ```
+
+##  Usage
+`pino-express` adds three props to each express's `req` obj
+1. `req.log.[level]`, the pino logger. [Levels](http://getpino.io/#/docs/api?id=loggerlevel-string-gettersetter): (trace,debug,info,warn,error,fatal,silent)
+1. `req.id`, unique id for each request
+2. `req.duration()`, used to calculate how long a req has been running.
+
 ##  Use with [pino](https://getpino.io/#/)
 ```js
 const app = require('express')()
