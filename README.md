@@ -41,7 +41,7 @@ app.listen(3000)
 {"level":30,"time":1540375273277,"msg":"How long did this take? 2ms","pid":94327,"hostname":"brMBP.local","id":1,"v":1}
 {"level":30,"time":1540374819426,"msg":"GET /foo/bar -> Request finished in 11ms!","pid":94018,"hostname":"brMBP.local","id":1,"response":{"requestUrl":"http://localhost:3000/","method":"GET","statusCode":304,"statusMessage":"Not Modified"},"responseTime":"11ms","v":1}
 ```
-For prettified output, see the [Optional step](#Optional)
+For prettified output, see the [Optional step](#optional)
 
 ##  Use with [pino-multi-stream](https://github.com/pinojs/pino-multi-stream)
 ```js
