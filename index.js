@@ -28,11 +28,10 @@ function pinoExpress (pino) {
     };
 
     log[useLevel]({
-      id: req.id,
       user_id: req.user && req.user.sub,
       response: response,
       responseTime: req.duration()
-    }, `${req.method} ${req.url} finished in ${req.duration()}!`);
+    }, `${req.method} ${req.url} -> Request finished in ${req.duration()}!`);
   }
 
   function onResError (err) {
@@ -50,14 +49,14 @@ function pinoExpress (pino) {
   function loggingMiddleware (req, res, next) {
     req.id = genReqId(req);
     res.locals[startTime] = res.locals[startTime] || Date.now();
-    req.duration = req.duration || function () { return ` ${ms(Date.now() - res.locals[startTime])} ` };
+    req.duration = req.duration || function () { return ms(Date.now() - res.locals[startTime]) };
     req.log = res.log = logger.child({id: req.id});
 
     res.on('finish', onResFinished);
     res.on('error', onResError);
 
     let requestInfo = getReqInfo(req);
-    req.log.info(requestInfo, `${req.method} ${req.url} start..`);
+    req.log.info(requestInfo, `${req.method} ${req.url} -> Request started..`);
 
     if (next) next()
   }
