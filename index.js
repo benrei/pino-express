@@ -52,12 +52,14 @@ function pinoExpress (pino) {
     req.duration = req.duration || function () { return ms(Date.now() - res.locals[startTime]) };
     req.log = res.log = logger.child({id: req.id});
 
-    res.on('finish', onResFinished);
-    res.on('error', onResError);
+    if(!res.locals['isInitiated']){   //  Prevents double up listeners
+      res.on('finish', onResFinished);
+      res.on('error', onResError);
+      let requestInfo = getReqInfo(req);
+      req.log.info(requestInfo, `${req.method} ${req.url} -> Request started..`);
+    }
 
-    let requestInfo = getReqInfo(req);
-    req.log.info(requestInfo, `${req.method} ${req.url} -> Request started..`);
-
+    res.locals['isInitiated'] = true;
     if (next) next()
   }
 }

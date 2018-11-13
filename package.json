@@ -1,6 +1,6 @@
 {
   "name": "pino-express",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pino express middleware",
   "main": "index.js",
   "scripts": {
