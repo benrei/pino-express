@@ -4,7 +4,6 @@ const ms = require('ms');
 const startTime = Symbol('startTime');
 
 function pinoExpress (pino) {
-  let useLevel = pino.useLevel || 'info';
 
   const logger = pino;
   let genReqId = reqIdGenFactory(pino.genReqId);
@@ -13,10 +12,12 @@ function pinoExpress (pino) {
   function onResFinished () {
     this.removeListener('finish', onResFinished);
 
+    let useLevel = 'info';
     const log = this.log;
     const req = this.req;
     const statusCode = this.statusCode;
 
+    if(statusCode < 400) useLevel = 'info';
     if(statusCode >= 400 && statusCode < 500) useLevel = 'warn';
     if(statusCode >= 500) useLevel = 'error';
 
