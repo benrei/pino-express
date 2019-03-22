@@ -67,25 +67,29 @@ function pinoExpress (pino) {
 
 function getReqInfo(req) {
   const request = {
-    requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
-    method: req.method,
     body: req.body,
+    method: req.method,
+    params: req.params,
+    protocol: req.protocol,
+    query: req.query,
+    requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
+    url: req.url,
   };
-  const requestHeaders = {
-    accept: req.headers['accept'],
-    'accept-encoding': req.headers['accept-encoding'],
-    'accept-language': req.headers['accept-language'],
-    authorization: req.headers['authorization'],
-    connection: req.headers['connection'],
-    host: req.headers['host'],
-    origin: req.headers['origin'],
-    referer: req.headers['referer'],
-    userAgent: req.headers['user-agent'],
-    'x-api-key': req.headers['x-api-key'],
-  };
+  // const requestHeaders = {
+  //   accept: req.headers['accept'],
+  //   'accept-encoding': req.headers['accept-encoding'],
+  //   'accept-language': req.headers['accept-language'],
+  //   authorization: req.headers['authorization'],
+  //   connection: req.headers['connection'],
+  //   host: req.headers['host'],
+  //   origin: req.headers['origin'],
+  //   referer: req.headers['referer'],
+  //   userAgent: req.headers['user-agent'],
+  //   'x-api-key': req.headers['x-api-key'],
+  // };
   return {
     request: request,
-    requestHeaders: requestHeaders,
+    requestHeaders: req.headers,
   }
 }
 
