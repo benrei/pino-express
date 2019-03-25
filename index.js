@@ -29,8 +29,9 @@ function pinoExpress (pino) {
     };
 
     log[useLevel]({
+      user: req.user,
       user_id: req.user && req.user.sub,
-      response: response,
+      res: response,
       responseTime: req.duration()
     }, `${req.method} ${req.url} -> Request finished in ${req.duration()}!`);
   }
