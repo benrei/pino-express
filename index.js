@@ -56,8 +56,8 @@ function pinoExpress (pino) {
     if(!res.locals['isInitiated']){   //  Prevents double up listeners
       res.on('finish', onResFinished);
       res.on('error', onResError);
-      let requestInfo = getReqInfo(req);
-      req.log.info(requestInfo, `${req.method} ${req.url} -> Request started..`);
+      let reqObject = buildReqObject(req);
+      req.log.info(reqObject, `${req.method} ${req.url} -> Request started..`);
     }
 
     res.locals['isInitiated'] = true;
@@ -65,8 +65,9 @@ function pinoExpress (pino) {
   }
 }
 
-function getReqInfo(req) {
+function buildReqObject(req) {
   const request = {
+    headers: req.headers,
     body: req.body,
     method: req.method,
     params: req.params,
@@ -75,22 +76,7 @@ function getReqInfo(req) {
     requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
     url: req.url,
   };
-  // const requestHeaders = {
-  //   accept: req.headers['accept'],
-  //   'accept-encoding': req.headers['accept-encoding'],
-  //   'accept-language': req.headers['accept-language'],
-  //   authorization: req.headers['authorization'],
-  //   connection: req.headers['connection'],
-  //   host: req.headers['host'],
-  //   origin: req.headers['origin'],
-  //   referer: req.headers['referer'],
-  //   userAgent: req.headers['user-agent'],
-  //   'x-api-key': req.headers['x-api-key'],
-  // };
-  return {
-    request: request,
-    requestHeaders: req.headers,
-  }
+  return {req: request}
 }
 
 function reqIdGenFactory (func) {
