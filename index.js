@@ -22,8 +22,10 @@ function pinoExpress (pino) {
     if(statusCode >= 500) useLevel = 'error';
 
     const response = {
-      requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
+      headers: this._headers,
       method: req.method,
+      requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
+      shouldKeepAlive: this.shouldKeepAlive,
       statusCode: statusCode,
       statusMessage: this.statusMessage,
     };
@@ -45,7 +47,7 @@ function pinoExpress (pino) {
       res: this,
       err: err || this.err || new Error('failed with status code ' + this.statusCode),
       responseTime: this.req.duration()
-    }, `${req.method} ${req.url} errored after ${req.duration()}!`);
+    }, `${this.req.method} ${this.req.url} errored after ${this.req.duration()}!`);
   }
 
   function loggingMiddleware (req, res, next) {
@@ -77,7 +79,10 @@ function buildReqObject(req) {
     requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
     url: req.url,
   };
-  return {req: request}
+  return {
+    req: request,
+    user_id: req.user && req.user.sub //  Add's user_id if exists
+  }
 }
 
 function reqIdGenFactory (func) {
