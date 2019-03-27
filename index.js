@@ -1,9 +1,10 @@
-'use strict'
+'use strict';
+const utils = require('./utils');
 
 const ms = require('ms');
 const startTime = Symbol('startTime');
 
-function pinoExpress (pino) {
+function pinoExpress (pino, options = utils.defaultOptions) {
 
   const logger = pino;
   let genReqId = reqIdGenFactory(pino.genReqId);
@@ -21,21 +22,10 @@ function pinoExpress (pino) {
     if(statusCode >= 400 && statusCode < 500) useLevel = 'warn';
     if(statusCode >= 500) useLevel = 'error';
 
-    const response = {
-      headers: this._headers,
-      method: req.method,
-      requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
-      shouldKeepAlive: this.shouldKeepAlive,
-      statusCode: statusCode,
-      statusMessage: this.statusMessage,
-    };
+    let logObj = utils.buildObject({req: req, res: this}, options.finishedLog);
+    logObj.responseTime = req.duration();
 
-    log[useLevel]({
-      user: req.user,
-      user_id: req.user && req.user.sub,
-      res: response,
-      responseTime: req.duration()
-    }, `${req.method} ${req.url} -> Request finished in ${req.duration()}!`);
+    log[useLevel](logObj, `Finished request -> ${req.method} ${req.url}, in ${req.duration()}!`);
   }
 
   function onResError (err) {
@@ -43,45 +33,42 @@ function pinoExpress (pino) {
 
     const log = this.log;
 
-    log.error({
-      res: this,
-      err: err || this.err || new Error('failed with status code ' + this.statusCode),
-      responseTime: this.req.duration()
-    }, `${this.req.method} ${this.req.url} errored after ${this.req.duration()}!`);
+    let logObj = utils.buildObject({req: this.req, res: this, err: err || this.err}, options.errorLog);
+    logObj.responseTime = this.req.duration();
+
+    log.error(logObj, `${this.req.method} ${this.req.url} errored after ${this.req.duration()}!`);
   }
 
+  /**
+   * Logger pr request, found in req.log or res.log
+   * @param req
+   * @param res
+   * @param next
+   */
   function loggingMiddleware (req, res, next) {
+    //  Set ut middleware logging
+    //  Set unique id for each request (auto increment, starts at 1)
     req.id = genReqId(req);
     res.locals[startTime] = res.locals[startTime] || Date.now();
+    //  Add duration func, (can be used during request to log time used)
     req.duration = req.duration || function () { return ms(Date.now() - res.locals[startTime]) };
-    req.log = res.log = logger.child({id: req.id});
 
+    //  Build child logger
+    let childLogger = utils.buildObject({req, res}, options.middlewareLog);
+    childLogger.id = req.id;
+    //  Add logger to req and res.
+    req.log = res.log = logger.child(childLogger);
+
+    //  Log request start
     if(!res.locals['isInitiated']){   //  Prevents double up listeners
       res.on('finish', onResFinished);
       res.on('error', onResError);
-      let reqObject = buildReqObject(req);
-      req.log.info(reqObject, `${req.method} ${req.url} -> Request started..`);
+      let logObj = utils.buildObject({req, res}, options.startLog);
+      req.log.info(logObj, `Started request -> ${req.method} ${req.url}`);
     }
 
     res.locals['isInitiated'] = true;
     if (next) next()
-  }
-}
-
-function buildReqObject(req) {
-  const request = {
-    headers: req.headers,
-    body: req.body,
-    method: req.method,
-    params: req.params,
-    protocol: req.protocol,
-    query: req.query,
-    requestUrl: req.protocol +'://'+ req.headers['host'] + req.url,
-    url: req.url,
-  };
-  return {
-    req: request,
-    user_id: req.user && req.user.sub //  Add's user_id if exists
   }
 }
 
