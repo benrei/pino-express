@@ -59,10 +59,10 @@ const defaultOptions = {
         //  Accepts array of strings
         req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
         //  Accepts string
-        userId: 'req.user.sub',
+        user: 'req.user',
         /*  Accepts object with string
         user: {
-          userId: 'req.user.sub'
+          user_id: 'req.user.sub'
         }
         */
         /*  Accepts object array of strings
@@ -74,7 +74,8 @@ const defaultOptions = {
     },
     //  Usage: req.log.info('log msg') or req.log.[level]('log msg')..
     middlewareLog: {
-        userId: 'req.user.sub',
+        req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
+        user: 'req.user',
     },
     //  Usage: Runs on response errored
     errorLog: {
@@ -82,13 +83,11 @@ const defaultOptions = {
         req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
         res: ['res._headers','res.shouldKeepAlive','res.statusCode','res.statusMessage'],
         user: 'req.user',
-        userId: 'req.user.sub',
     },
     //  Usage: Runs after request.end() has been called
     finishedLog: {
         res: ['res._headers','res.shouldKeepAlive','res.statusCode','res.statusMessage'],
         user: 'req.user',
-        userId: 'req.user.sub',
     }
 }
 //  

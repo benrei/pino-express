@@ -2,12 +2,12 @@ var get = require('lodash.get');
 
 const defaultStartLog = {
   req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
-  userId: 'req.user.sub',
-  test: {host: 'req.headers.host'}
+  user: 'req.user',
 };
 
 const defaultMiddlewareLog = {
-  userId: 'req.user.sub',
+  req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
+  user: 'req.user',
 };
 
 const defaultErrorLog = {
@@ -15,13 +15,11 @@ const defaultErrorLog = {
   req: ['req.body','req.headers','req.method','req.params','req.protocol','req.query','req.url'],
   res: ['res._headers','res.shouldKeepAlive','res.statusCode','res.statusMessage'],
   user: 'req.user',
-  userId: 'req.user.sub',
 };
 
 const defaultFinishedLog = {
   res: ['res._headers','res.shouldKeepAlive','res.statusCode','res.statusMessage'],
   user: 'req.user',
-  userId: 'req.user.sub',
 };
 
 
